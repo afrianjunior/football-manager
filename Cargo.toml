@@ -1,0 +1,19 @@
+[package]
+name = "screenshot-test"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "test_screenshot"
+path = "test_screenshot.rs"
+
+[[bin]]
+name = "test_platform_detection"
+path = "test_platform_detection.rs"
+
+[[bin]]
+name = "test_windows_screenshot"
+path = "test_windows_screenshot.rs"
+
+[dependencies]
+chrono = "0.4"
