@@ -20,12 +20,12 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri-plugin-log = "2"
 log = "0.4"
-rdev = "0.5.3"
-screenshots = "0.8"
-image = "0.25"        # needed to save PNGs
-chrono = "0.4"
+tauri-plugin-global-shortcut = "2"
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# Using system commands for screenshot functionality
+chrono = "0.4"
+dirs = "5.0"
 
