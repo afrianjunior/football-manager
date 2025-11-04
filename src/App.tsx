@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { getCurrent } from "@tauri-apps/api/window";
-import "./App.css";
+import { ImageAnalyzer } from "./components/ImageAnalyzer";
+import "./App-modern.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
   const [keyPresses, setKeyPresses] = useState<string[]>([]);
   const [screenshots, setScreenshots] = useState<string[]>([]);
-
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const [latestScreenshot, setLatestScreenshot] = useState<string>("");
+  const [screenshotAnalyses, setScreenshotAnalyses] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'screenshots' | 'keypress'>('screenshots');
 
   // Listen for key presses
   useEffect(() => {
@@ -36,34 +31,42 @@ function App() {
   // Listen for screenshot events from backend
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let isMounted = true;
 
     const setupListener = async () => {
       try {
-        // Check if we're running in Tauri
-        const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__ !== undefined;
-        
-        if (isTauri) {
           const unsubscribe = await listen("screenshot-taken", (event) => {
+            console.log(event)
             const payload = event.payload as { path?: string; success: boolean; error?: string };
             
+            if (!isMounted) return; // Prevent state updates on unmounted component
+            
             if (payload.success && payload.path) {
-              setScreenshots(prev => [...prev, `Screenshot saved: ${payload.path}`].slice(-5)); // Keep last 5
+              setScreenshots(prev => [payload.path, ...prev].slice(-10));
+              setLatestScreenshot(payload.path);
             } else {
-              setScreenshots(prev => [...prev, `Screenshot failed: ${payload.error || "Unknown error"}`].slice(-5)); // Keep last 5
+              setScreenshots(prev => [`❌ Screenshot failed: ${payload.error || "Unknown error"}`, ...prev].slice(-10));
             }
           });
           
-          unlisten = unsubscribe;
-        }
+          if (isMounted) {
+            unlisten = unsubscribe;
+          } else {
+            // Component unmounted before listen completed
+            unsubscribe();
+          }
       } catch (error) {
-        console.log("Screenshot listener setup failed:", error);
-        setScreenshots(prev => [...prev, `Screenshot listener setup failed`].slice(-5));
+        if (isMounted) {
+          console.log("Screenshot listener setup failed:", error);
+          setScreenshots(prev => [`❌ Screenshot listener setup failed`, ...prev].slice(-10));
+        }
       }
     };
 
     setupListener();
 
     return () => {
+      isMounted = false;
       if (unlisten) {
         unlisten();
       }
@@ -71,66 +74,144 @@ function App() {
   }, []);
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-
-      <div style={{ marginTop: "2rem", padding: "1rem", backgroundColor: "#f0f0f0", borderRadius: "8px" }}>
-        <h3>Key Press Monitor</h3>
-        <p>Press Comma (,) or Period (.) keys to test!</p>
-        <div style={{ marginTop: "1rem" }}>
-          {keyPresses.length === 0 ? (
-            <p style={{ color: "#666" }}>No keys pressed yet...</p>
-          ) : (
-            keyPresses.map((press, index) => (
-              <div key={index} style={{ margin: "0.25rem 0" }}>{press}</div>
-            ))
-          )}
+    <div className="app-container">
+      <header className="app-header">
+        <div className="header-content">
+          <h1 className="app-title">📸 Screenshot AI</h1>
+          <p className="app-subtitle">Capture, Analyze, Understand</p>
         </div>
-      </div>
-
-      <div style={{ marginTop: "2rem", padding: "1rem", backgroundColor: "#e8f5e8", borderRadius: "8px" }}>
-        <h3>Screenshot Monitor</h3>
-        <p>Use Ctrl+Shift+S to take screenshots!</p>
-        <div style={{ marginTop: "1rem" }}>
-          {screenshots.length === 0 ? (
-            <p style={{ color: "#666" }}>No screenshots taken yet...</p>
-          ) : (
-            screenshots.map((screenshot, index) => (
-              <div key={index} style={{ margin: "0.25rem 0", fontSize: "0.9rem" }}>{screenshot}</div>
-            ))
-          )}
+        <div className="header-actions">
+          <div className="shortcut-indicator">
+            <span className="shortcut-key">Ctrl</span> + 
+            <span className="shortcut-key">Shift</span> + 
+            <span className="shortcut-key">S</span>
+          </div>
         </div>
-      </div>
-    </main>
+      </header>
+
+      <main className="main-content">
+        <div className="tab-navigation">
+          <button 
+            className={`tab-button ${activeTab === 'screenshots' ? 'active' : ''}`}
+            onClick={() => setActiveTab('screenshots')}
+          >
+            📸 Screenshots
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'keypress' ? 'active' : ''}`}
+            onClick={() => setActiveTab('keypress')}
+          >
+            ⌨️ Key Monitor
+          </button>
+        </div>
+
+        {activeTab === 'screenshots' && (
+          <div className="content-panel">
+            <div className="panel-header">
+              <h2>Screenshot Gallery</h2>
+              <div className="screenshot-count">
+                {screenshots.length} {screenshots.length === 1 ? 'screenshot' : 'screenshots'}
+              </div>
+            </div>
+            
+            {screenshots.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">📷</div>
+                <h3>No screenshots yet</h3>
+                <p>Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> to capture your first screenshot</p>
+              </div>
+            ) : (
+              <div className="screenshot-grid">
+                {screenshots.map((screenshot, index) => (
+                  <div key={index} className="screenshot-card">
+                    <div className="screenshot-info">
+                      <div className="screenshot-path">{screenshot}</div>
+                      <div className="screenshot-time">Just now</div>
+                    </div>
+                    {index === 0 && (
+                      <div className="latest-badge">Latest</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {latestScreenshot && (
+              <div className="ai-analysis-panel">
+                <div className="panel-header">
+                  <h3>🤖 AI Analysis</h3>
+                  <div className="ai-status">Ready</div>
+                </div>
+                <ImageAnalyzer 
+                  imagePath={latestScreenshot} 
+                  onAnalysisComplete={(analysis) => {
+                    setScreenshotAnalyses(prev => [analysis, ...prev].slice(-5));
+                  }} 
+                />
+              </div>
+            )}
+
+            {screenshotAnalyses.length > 0 && (
+              <div className="analysis-history">
+                <h3>📊 Analysis History</h3>
+                <div className="analysis-timeline">
+                  {screenshotAnalyses.map((analysis, index) => (
+                    <div key={index} className="analysis-item">
+                      <div className="analysis-header">
+                        <span className="analysis-number">#{index + 1}</span>
+                        <span className="analysis-time">Recent</span>
+                      </div>
+                      <div className="analysis-content">{analysis}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'keypress' && (
+          <div className="content-panel">
+            <div className="panel-header">
+              <h2>Key Press Monitor</h2>
+              <div className="keypress-hint">
+                Press <kbd>,</kbd> (comma) or <kbd>.</kbd> (period) to test
+              </div>
+            </div>
+            
+            {keyPresses.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">⌨️</div>
+                <h3>Waiting for key presses</h3>
+                <p>Press comma (,) or period (.) to see them appear here</p>
+              </div>
+            ) : (
+              <div className="keypress-timeline">
+                {keyPresses.map((press, index) => (
+                  <div key={index} className="keypress-item">
+                    <div className="keypress-badge">{press}</div>
+                    <div className="keypress-time">Just now</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <footer className="app-footer">
+        <div className="footer-content">
+          <span>Powered by Tauri + React + AI</span>
+          <div className="footer-links">
+            <a href="https://tauri.app" target="_blank" rel="noopener noreferrer">Tauri</a>
+            <span>•</span>
+            <a href="https://react.dev" target="_blank" rel="noopener noreferrer">React</a>
+            <span>•</span>
+            <a href="https://openai.com" target="_blank" rel="noopener noreferrer">OpenAI</a>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
 
