@@ -7,10 +7,7 @@ import Navigation from "./components/Navigation";
 function Layout() {
   return (
     <>
-      <Navigation />
-      <div style={{ paddingTop: '80px' }}>
-        <Outlet />
-      </div>
+      <Outlet />
     </>
   );
 }
