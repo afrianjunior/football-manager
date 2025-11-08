@@ -28,4 +28,5 @@ serde_json = "1"
 # Cross-platform screenshot functionality - disabled for now due to linking issues
 chrono = "0.4"
 dirs = "5.0"
+tauri-plugin-sql = "2"
 

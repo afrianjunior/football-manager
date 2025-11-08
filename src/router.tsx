@@ -3,12 +3,14 @@ import Home from "./pages/Home";
 import ScreenshotAI from "./pages/ScreenshotAI";
 import KeyMonitor from "./pages/KeyMonitor";
 import Navigation from "./components/Navigation";
+import PlayersPage from "./pages/Players";
 
 function Layout() {
   return (
-    <>
+    <div className="flex h-screen bg-background">
+      <Navigation />
       <Outlet />
-    </>
+    </div>
   );
 }
 
@@ -21,8 +23,8 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/screenshot-ai",
-        element: <ScreenshotAI />,
+        path: "/players",
+        element: <PlayersPage />,
       },
       {
         path: "/key-monitor",

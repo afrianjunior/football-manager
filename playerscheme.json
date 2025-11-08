@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/football_player.schema.json",
+  "title": "Football Player Profile Schema",
+  "description": "Defines how to extract Football Manager-style player data from screenshots or text for AI analysis.",
+  "type": "object",
+  "properties": {
+    "player": {
+      "type": "object",
+      "description": "Biographical, contract, and personality details of the player.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique player identifier, usually based on name and birth year." },
+        "name": { "type": "string", "description": "Full name of the player." },
+        "age": { "type": "integer", "description": "Age of the player in years." },
+        "date_of_birth": { "type": "string", "description": "Date of birth in YYYY-MM-DD format." },
+        "nationality": { "type": "string", "description": "Country or nationality of the player." },
+        "preferred_foot": { "type": "string", "description": "Player's dominant foot: Right, Left, or Both." },
+        "personality": { "type": "string", "description": "Describes mental and behavioral traits." },
+        "media_description": { "type": "string", "description": "Short role description (e.g., Forward, Defender, etc.)." },
+        "reputation": { "type": "string", "description": "Level of reputation (e.g., Local, National, Continental, Worldwide)." },
+        "estimated_value_usd": {
+          "type": "object",
+          "properties": {
+            "min": { "type": "number", "description": "Minimum estimated market value in USD." },
+            "max": { "type": "number", "description": "Maximum estimated market value in USD." }
+          }
+        },
+        "contract": {
+          "type": "object",
+          "description": "Contractual details of the player.",
+          "properties": {
+            "club": { "type": "string", "description": "Name of the club the player is contracted to." },
+            "salary_per_year_usd": { "type": "number", "description": "Annual salary in USD." },
+            "expiry_date": { "type": "string", "description": "Contract end date in YYYY-MM-DD format." }
+          }
+        },
+        "height_cm": { "type": "integer", "description": "Height in centimeters." },
+        "weight_kg": { "type": "integer", "description": "Weight in kilograms." },
+        "positions": {
+          "type": "object",
+          "properties": {
+            "primary": { "type": "string", "description": "Main playing position (e.g., Striker, Midfielder)." },
+            "roles": { "type": "array", "items": { "type": "string" }, "description": "Playable roles or duty styles." }
+          }
+        },
+        "fitness": {
+          "type": "object",
+          "description": "Fitness and health-related info.",
+          "properties": {
+            "overall_condition": { "type": "string", "description": "General physical condition, e.g., Good or Poor." },
+            "match_sharpness": { "type": "string", "description": "Level of match readiness (High, Medium, Low)." },
+            "injury_risk": { "type": "string", "description": "Risk of injury (Low, Medium, High)." }
+          }
+        },
+        "dynamics": {
+          "type": "object",
+          "description": "Social and influence aspects within the team.",
+          "properties": {
+            "influence": { "type": "string", "description": "Influence level within squad (e.g., Influential Player, Team Leader)." },
+            "group": { "type": "string", "description": "Social group affiliation (Core, Secondary, etc.)." },
+            "positives": { "type": "integer", "description": "Number of positive relationships or morale indicators." },
+            "negatives": { "type": "integer", "description": "Number of negative relationships or morale indicators." },
+            "status": { "type": "string", "description": "General social or morale status." }
+          }
+        },
+        "plans": {
+          "type": "object",
+          "description": "Future and retirement plans.",
+          "properties": {
+            "short_term": { "type": "string", "description": "Immediate short-term plans (e.g., transfer, training goals)." },
+            "long_term": { "type": "string", "description": "Long-term ambitions or post-retirement goals." }
+          }
+        }
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Player performance attributes expressed as percentage (0–100).",
+      "properties": {
+        "technical": { "type": "object", "additionalProperties": { "type": "number", "description": "Technical skill rating as percentage (value / 20 * 100)." } },
+        "mental": { "type": "object", "additionalProperties": { "type": "number", "description": "Mental attribute rating as percentage." } },
+        "physical": { "type": "object", "additionalProperties": { "type": "number", "description": "Physical attribute rating as percentage." } }
+      }
+    },
+    "overall": {
+      "type": "object",
+      "description": "Aggregated scores across attribute groups.",
+      "properties": {
+        "average_technical": { "type": "number", "description": "Mean technical attribute score (0–100)." },
+        "average_mental": { "type": "number", "description": "Mean mental attribute score (0–100)." },
+        "average_physical": { "type": "number", "description": "Mean physical attribute score (0–100)." },
+        "total_overall": { "type": "number", "description": "Overall player strength combining all attributes." }
+      }
+    },
+    "player_traits": {
+      "type": "array",
+      "description": "Special habits or play styles (e.g., 'Likes to beat offside trap').",
+      "items": { "type": "string" }
+    },
+    "goalkeeper_rating": { "type": "integer", "description": "Overall goalkeeper skill rating (0–20 scale, optional for non-GKs)." },
+    "stats": {
+      "type": "object",
+      "description": "Seasonal match statistics (apps, goals, assists, etc.)."
+    },
+    "profile_summary": {
+      "type": "object",
+      "description": "AI-generated summary of player’s performance and tactical fit.",
+      "properties": {
+        "strengths": { "type": "array", "items": { "type": "string" }, "description": "List of main strengths." },
+        "weaknesses": { "type": "array", "items": { "type": "string" }, "description": "List of main weaknesses." },
+        "ideal_tactical_fit": { "type": "string", "description": "Summary of suitable tactical role or formation fit." }
+      }
+    }
+  },
+  "required": ["player", "attributes", "overall"]
+}

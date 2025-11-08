@@ -10,6 +10,8 @@ export default function ScreenshotAI() {
   const [screenshotAnalyses, setScreenshotAnalyses] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'screenshots' | 'keypress'>('screenshots');
 
+  console.log(activeTab)
+
   // Listen for key presses
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {

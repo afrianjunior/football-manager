@@ -1,10 +1,10 @@
 import { Link } from "react-router";
-import { Card, CardBody, CardFooter, Button, Spacer } from "@heroui/react";
+import { Button } from "@heroui/react";
 
 export default function Home() {
   return (
     <>
-      Hello
+      <Button>Hello</Button>
     </>
   );
 }
