@@ -1,7 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 import { extractPlayerDataFromScreenshot, type FootballPlayer } from "../lib/player-ai-service";
-
+import db from "@/lib/db";
 export default function PlayersPage () {
   const [playerData, setPlayerData] = useState<FootballPlayer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +20,7 @@ export default function PlayersPage () {
             if (!isMounted) return; // Prevent state updates on unmounted component
             
             if (payload.success && payload.path) {
+              console.log("GOTCHA", __dirname, payload.path)
                 // Extract player data using AI
                 setIsLoading(true);
                 setError(null);

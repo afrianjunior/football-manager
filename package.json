@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "migration:up": "bun run scripts/migrate.ts up",
+    "migration:down": "bun run scripts/migrate.ts down",
+    "migration:status": "bun run scripts/migrate.ts status",
+    "migration:create": "bun run scripts/create-migration.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.60",
